@@ -45,6 +45,13 @@ async def create_project(project: Project):
     result = collection.insert_one(project.dict())
     return {"message": "Project created successfully.", "project_id": str(result.inserted_id)}
 
+@app.get("/projects/latest")
+async def fetch_latest_project():
+    latest_project = collection.find_one(sort=[("_id", -1)])
+    if not latest_project:
+        raise HTTPException(status_code=404, detail="No projects found.")
+    return serialize_project(latest_project)
+
 @app.get("/projects/{project_id}")
 async def read_project(project_id: int):
     project = collection.find_one({"ID": project_id})
